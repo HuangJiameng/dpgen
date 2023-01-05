@@ -495,7 +495,7 @@ def pert_scaled(jdata) :
     sys_pe.sort()
     os.chdir(cwd)    
 
-    pert_cmd = "python "+os.path.join(ROOT_PATH, 'data/tools/create_random_disturb.py')
+    pert_cmd = "sys.executable "+os.path.join(ROOT_PATH, 'data/tools/create_random_disturb.py')
     pert_cmd += ' -etmax %f -ofmt vasp POSCAR %d %f > /dev/null' %(pert_box, pert_numb, pert_atom)    
     for ii in sys_pe :
         for jj in scale :
