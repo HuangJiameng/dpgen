@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env sys.executable
 
 import os, re, shutil, logging
 import glob

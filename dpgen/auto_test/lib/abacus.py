@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/env sys.executable
 import os,sys
 from unicodedata import numeric
 import dpdata

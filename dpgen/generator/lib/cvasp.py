@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env sys.executable
 # -*- coding: utf-8 -*-
 
 from custodian.vasp.jobs import VaspJob as cvj

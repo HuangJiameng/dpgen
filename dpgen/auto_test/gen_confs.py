@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env sys.executable
 
 import os, re, argparse
 import dpgen.auto_test.lib.crys as crys

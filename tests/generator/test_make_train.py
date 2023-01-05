@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env sys.executable
 
 import os,sys,json,glob,shutil,dpdata
 import numpy as np

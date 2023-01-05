@@ -1,4 +1,4 @@
-#!/usr/bin/env python3 
+#!/usr/bin/env sys.executable 
 
 import warnings
 import os,json,shutil,re,glob,argparse

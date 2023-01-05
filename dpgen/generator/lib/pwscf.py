@@ -1,4 +1,4 @@
-#!/usr/bin/python3 
+#!/usr/bin/env sys.executable
 
 import numpy as np
 # from lib.vasp import system_from_poscar

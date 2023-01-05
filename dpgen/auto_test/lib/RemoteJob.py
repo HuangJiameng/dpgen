@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env sys.executable
 
 import os, sys, paramiko, json, uuid, tarfile, time, stat
 from enum import Enum
