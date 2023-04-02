@@ -2,20 +2,21 @@
 # coding: utf-8
 # Copyright (c) The Dpmodeling Team.
 
+import json
 import os
 import time
-import json
-from uuid import uuid4
-from threading import Thread
+import traceback
 from glob import glob
-from dpgen import dlog
-from dpgen import SHORT_CMD
+from threading import Thread
+from uuid import uuid4
+
+import numpy as np
+from dpdata import LabeledSystem, System
+from monty.serialization import dumpfn, loadfn
+
+from dpgen import SHORT_CMD, dlog
 from dpgen.database.entry import Entry
 from dpgen.database.vasp import VaspInput
-from dpdata import System, LabeledSystem
-from monty.serialization import loadfn, dumpfn
-import numpy as np
-import traceback
 
 OUTPUT = SHORT_CMD + "_db.json"
 SUPPORTED_CACULATOR = ["vasp", "pwscf", "gaussian"]
@@ -54,7 +55,6 @@ def _main(param):
 
 
 def parsing_vasp(path, config_info_dict, skip_init, output=OUTPUT, id_prefix=None):
-
     fp_iters = os.path.join(path, ITERS_PAT)
     dlog.debug(fp_iters)
     f_fp_iters = glob(fp_iters)
@@ -113,7 +113,7 @@ def _parsing_vasp(paths, config_info_dict, id_prefix, iters=True):
                 iter_info = tmp_iter.split(".")[-1]
                 sys_info = path.split("/")[-4]
                 config_info_int = int(tmp_.split(".")[1])
-                for (key, value) in config_info_dict.items():
+                for key, value in config_info_dict.items():
                     if config_info_int in value:
                         config_info = key
                 attrib["config_info"] = config_info

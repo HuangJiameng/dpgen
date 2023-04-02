@@ -1,8 +1,12 @@
 #!/usr/bin/env python3
 
-import random, os, sys, dpdata
-import numpy as np
+import os
+import random
 import subprocess as sp
+import sys
+
+import dpdata
+import numpy as np
 import scipy.constants as pc
 from packaging.version import Version
 
@@ -209,7 +213,6 @@ def get_all_dumped_forces(file_name):
     exist_atoms = False
 
     for idx, ii in enumerate(lines):
-
         if "ITEM: NUMBER OF ATOMS" in ii:
             natoms = int(lines[idx + 1])
             exist_natoms = True

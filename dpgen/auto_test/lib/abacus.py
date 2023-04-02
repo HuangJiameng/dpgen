@@ -1,10 +1,13 @@
 #!/usr/bin/python3
-import os, sys
+import os
+import sys
 from unicodedata import numeric
+
 import dpdata
-import dpgen.generator.lib.abacus_scf as abacus_scf
 import numpy as np
 from pymatgen.core.structure import Structure
+
+import dpgen.generator.lib.abacus_scf as abacus_scf
 
 A2BOHR = 1.8897261254578281
 MASS_DICT = {
@@ -412,10 +415,17 @@ def final_stru(abacus_path):
             with open(logf) as f1:
                 lines = f1.readlines()
             for i in range(1, len(lines)):
-                if lines[-i][36:41] == "istep":
-                    max_step = int(lines[-i].split()[-1])
+                max_step = ""
+                if "ALGORITHM --------------- ION=" in lines[-i]:
+                    index_ben = lines[-i].index("ION=") + 4
+                    index_end = lines[-i].index("ELEC")
+                    max_step = int(lines[-i][index_ben:index_end])
+                    if max_step < 2:
+                        max_step = ""
+                    else:
+                        max_step -= 2
                     break
-            return "OUT.%s/STRU_ION%d_D" % (suffix, max_step)
+            return "OUT.%s/STRU_ION%s_D" % (suffix, str(max_step))
     elif calculation == "md":
         with open(logf) as f1:
             lines = f1.readlines()

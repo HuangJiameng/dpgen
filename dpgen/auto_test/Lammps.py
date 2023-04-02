@@ -1,15 +1,17 @@
 import os
 import warnings
+
+from monty.serialization import dumpfn, loadfn
+
 import dpgen.auto_test.lib.lammps as lammps
 from dpgen import dlog
-from monty.serialization import loadfn, dumpfn
-from dpgen.auto_test.Task import Task
 from dpgen.auto_test.lib.lammps import (
     inter_deepmd,
-    inter_meam,
-    inter_eam_fs,
     inter_eam_alloy,
+    inter_eam_fs,
+    inter_meam,
 )
+from dpgen.auto_test.Task import Task
 
 supported_inter = ["deepmd", "meam", "eam_fs", "eam_alloy"]
 
@@ -29,7 +31,6 @@ class Lammps(Task):
         self.set_inter_type_func()
 
     def set_inter_type_func(self):
-
         if self.inter_type == "deepmd":
             self.inter_func = inter_deepmd
 
@@ -43,7 +44,6 @@ class Lammps(Task):
             self.inter_func = inter_eam_alloy
 
     def set_model_param(self):
-
         if self.inter_type == "deepmd":
             model_name = os.path.basename(self.model)
             deepmd_version = self.inter.get("deepmd_version", "1.2.0")

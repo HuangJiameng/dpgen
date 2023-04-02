@@ -6,25 +6,26 @@ calypso as model devi engine:
 """
 
 import copy
-import dpdata
+import glob
 import math
-import numpy as np
 import os
 import random
 import re
-import glob
 import shutil
 import sys
-from ase.io.vasp import write_vasp
-from ase.io.trajectory import Trajectory
-from pathlib import Path
 from itertools import combinations
+from pathlib import Path
+
+import dpdata
+import numpy as np
+from ase.io.trajectory import Trajectory
+from ase.io.vasp import write_vasp
 from packaging.version import Version
+
 from dpgen import dlog
-from dpgen.generator.lib.utils import create_path
-from dpgen.generator.lib.utils import make_iter_name
-from dpgen.generator.lib.parse_calypso import _parse_calypso_input
 from dpgen.dispatcher.Dispatcher import make_submission
+from dpgen.generator.lib.parse_calypso import _parse_calypso_input
+from dpgen.generator.lib.utils import create_path, make_iter_name
 
 train_name = "00.train"
 model_devi_name = "01.model_devi"
@@ -36,7 +37,6 @@ calypso_model_devi_name = "model_devi_results"
 def gen_structures(
     iter_index, jdata, mdata, caly_run_path, current_idx, length_of_caly_runopt_list
 ):
-
     # run calypso
     # vsc means generate elemental, binary and ternary at the same time
     vsc = jdata.get("vsc", False)  # take CALYPSO as confs generator
@@ -342,7 +342,6 @@ def gen_structures(
 
 
 def gen_main(iter_index, jdata, mdata, caly_run_opt_list, gen_idx):
-
     iter_name = make_iter_name(iter_index)
     work_path = os.path.join(iter_name, model_devi_name)
 
@@ -455,7 +454,6 @@ def analysis(iter_index, jdata, calypso_model_devi_path):
 
 
 def run_calypso_model_devi(iter_index, jdata, mdata):
-
     dlog.info("start running CALYPSO")
 
     iter_name = make_iter_name(iter_index)

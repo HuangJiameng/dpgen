@@ -1,14 +1,15 @@
 import argparse
 import copy
-import dpdata
 import glob
 import math
-import numpy as np
 import os
-import sys
 import shutil
-from deepmd.infer import calc_model_devi
+import sys
+
+import dpdata
+import numpy as np
 from deepmd.infer import DeepPot as DP
+from deepmd.infer import calc_model_devi
 
 
 def write_model_devi_out(devi, fname):
@@ -33,7 +34,6 @@ def write_model_devi_out(devi, fname):
 
 
 def Modd(all_models, type_map):
-
     # Model Devi
 
     cwd = os.getcwd()
@@ -43,7 +43,6 @@ def Modd(all_models, type_map):
     pcount = 0
     strus_lists = glob.glob(os.path.join(cwd, "*.structures"))
     for num, strus_path in enumerate(strus_lists):
-
         structures_data = dpdata.System(strus_path, "deepmd/npy", type_map=type_map)
 
         # every 500 confs in one task dir
@@ -114,7 +113,6 @@ def Modd(all_models, type_map):
 
 
 if __name__ == "__main__":
-
     cwd = os.getcwd()
     model_path = os.path.join(
         os.path.abspath(os.path.join(cwd, os.pardir)), "gen_stru_analy"

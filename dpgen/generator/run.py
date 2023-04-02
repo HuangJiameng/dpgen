@@ -9,88 +9,95 @@ iter:
         03.data
 """
 
-import os
-import sys
 import argparse
+import copy
 import glob
+import itertools
 import json
-import random
 import logging
 import logging.handlers
+import os
 import queue
-import warnings
+import random
 import shutil
-import itertools
-import copy
-import dpdata
-import numpy as np
 import subprocess as sp
-import scipy.constants as pc
+import sys
+import warnings
 from collections import Counter
 from collections.abc import Iterable
-from packaging.version import Version
 from typing import List
+
+import dpdata
+import numpy as np
+import scipy.constants as pc
 from numpy.linalg import norm
-from dpgen import dlog
-from dpgen import SHORT_CMD
-from dpgen.generator.lib.utils import make_iter_name
-from dpgen.generator.lib.utils import create_path
-from dpgen.generator.lib.utils import copy_file_list
-from dpgen.generator.lib.utils import replace
-from dpgen.generator.lib.utils import log_iter
-from dpgen.generator.lib.utils import record_iter
-from dpgen.generator.lib.utils import log_task
-from dpgen.generator.lib.utils import symlink_user_forward_files
-from dpgen.generator.lib.lammps import (
-    make_lammps_input,
-    get_dumped_forces,
-    get_all_dumped_forces,
-)
-from dpgen.generator.lib.make_calypso import (
-    _make_model_devi_native_calypso,
-    _make_model_devi_buffet,
-)
-from dpgen.generator.lib.run_calypso import (
-    gen_structures,
-    analysis,
-    run_calypso_model_devi,
-)
-from dpgen.generator.lib.parse_calypso import (
-    _parse_calypso_input,
-    _parse_calypso_dis_mtx,
-)
-from dpgen.generator.lib.vasp import write_incar_dict
-from dpgen.generator.lib.vasp import make_vasp_incar_user_dict
-from dpgen.generator.lib.vasp import incar_upper
-from dpgen.generator.lib.pwscf import make_pwscf_input
+from packaging.version import Version
+from pymatgen.io.vasp import Incar, Kpoints, Potcar
+
+from dpgen import ROOT_PATH, SHORT_CMD, dlog
+from dpgen.auto_test.lib.vasp import make_kspacing_kpoints
+from dpgen.dispatcher.Dispatcher import make_submission
 from dpgen.generator.lib.abacus_scf import (
-    make_abacus_scf_stru,
+    get_abacus_input_parameters,
+    get_abacus_STRU,
     make_abacus_scf_input,
     make_abacus_scf_kpt,
+    make_abacus_scf_stru,
 )
-from dpgen.generator.lib.abacus_scf import get_abacus_input_parameters, get_abacus_STRU
-
-# from dpgen.generator.lib.pwscf import cvt_1frame
-from dpgen.generator.lib.pwmat import make_pwmat_input_dict
-from dpgen.generator.lib.pwmat import write_input_dict
-from dpgen.generator.lib.pwmat import make_pwmat_input_user_dict
-from dpgen.generator.lib.pwmat import input_upper
-from dpgen.generator.lib.siesta import make_siesta_input
-from dpgen.generator.lib.gaussian import make_gaussian_input, take_cluster
 from dpgen.generator.lib.cp2k import (
     make_cp2k_input,
     make_cp2k_input_from_external,
     make_cp2k_xyz,
 )
 from dpgen.generator.lib.ele_temp import NBandsEsti
-from dpgen.remote.decide_machine import convert_mdata
-from dpgen.dispatcher.Dispatcher import make_submission
-from dpgen.util import sepline, expand_sys_str, normalize, convert_training_data_to_hdf5
-from dpgen import ROOT_PATH
-from pymatgen.io.vasp import Incar, Kpoints, Potcar
-from dpgen.auto_test.lib.vasp import make_kspacing_kpoints
-from .arginfo import run_jdata_arginfo
+from dpgen.generator.lib.gaussian import make_gaussian_input, take_cluster
+from dpgen.generator.lib.lammps import (
+    get_all_dumped_forces,
+    get_dumped_forces,
+    make_lammps_input,
+)
+from dpgen.generator.lib.make_calypso import (
+    _make_model_devi_buffet,
+    _make_model_devi_native_calypso,
+)
+from dpgen.generator.lib.parse_calypso import (
+    _parse_calypso_dis_mtx,
+    _parse_calypso_input,
+)
 
+# from dpgen.generator.lib.pwscf import cvt_1frame
+from dpgen.generator.lib.pwmat import (
+    input_upper,
+    make_pwmat_input_dict,
+    make_pwmat_input_user_dict,
+    write_input_dict,
+)
+from dpgen.generator.lib.pwscf import make_pwscf_input
+from dpgen.generator.lib.run_calypso import (
+    analysis,
+    gen_structures,
+    run_calypso_model_devi,
+)
+from dpgen.generator.lib.siesta import make_siesta_input
+from dpgen.generator.lib.utils import (
+    copy_file_list,
+    create_path,
+    log_iter,
+    log_task,
+    make_iter_name,
+    record_iter,
+    replace,
+    symlink_user_forward_files,
+)
+from dpgen.generator.lib.vasp import (
+    incar_upper,
+    make_vasp_incar_user_dict,
+    write_incar_dict,
+)
+from dpgen.remote.decide_machine import convert_mdata
+from dpgen.util import convert_training_data_to_hdf5, expand_sys_str, normalize, sepline
+
+from .arginfo import run_jdata_arginfo
 
 template_name = "template"
 train_name = "00.train"
@@ -655,7 +662,6 @@ def run_train(iter_index, jdata, mdata):
     if Version(mdata["deepmd_version"]) >= Version("1") and Version(
         mdata["deepmd_version"]
     ) < Version("3"):
-
         # 1.x
         ## Commands are like `dp train` and `dp freeze`
         ## train_command should not be None
@@ -1764,7 +1770,6 @@ def _make_model_devi_amber(
 
 
 def run_md_model_devi(iter_index, jdata, mdata):
-
     # rmdlog.info("This module has been run !")
     model_devi_exec = mdata["model_devi_command"]
 
@@ -1823,7 +1828,6 @@ def run_md_model_devi(iter_index, jdata, mdata):
             if use_plm_path:
                 forward_files += ["plmpath.pdb"]
     elif model_devi_engine == "gromacs":
-
         gromacs_settings = jdata.get("gromacs_settings", {})
         mdp_filename = gromacs_settings.get("mdp_filename", "md.mdp")
         topol_filename = gromacs_settings.get("topol_filename", "processed.top")
@@ -1937,7 +1941,6 @@ def run_md_model_devi(iter_index, jdata, mdata):
 
 
 def run_model_devi(iter_index, jdata, mdata):
-
     model_devi_engine = jdata.get("model_devi_engine", "lammps")
     if model_devi_engine != "calypso":
         run_md_model_devi(iter_index, jdata, mdata)
@@ -3832,7 +3835,6 @@ def run_fp(iter_index, jdata, mdata):
 
 
 def post_fp_check_fail(iter_index, jdata, rfailed=None):
-
     ratio_failed = rfailed if rfailed else jdata.get("ratio_failed", 0.05)
     iter_name = make_iter_name(iter_index)
     work_path = os.path.join(iter_name, fp_name)
@@ -3861,7 +3863,6 @@ def post_fp_check_fail(iter_index, jdata, rfailed=None):
 
 
 def post_fp_vasp(iter_index, jdata, rfailed=None):
-
     ratio_failed = rfailed if rfailed else jdata.get("ratio_failed", 0.05)
     model_devi_engine = jdata.get("model_devi_engine", "lammps")
     if model_devi_engine != "calypso":
@@ -4042,27 +4043,21 @@ def post_fp_abacus_scf(iter_index, jdata):
         sys_output.sort()
         sys_input.sort()
 
-        flag = True
+        all_sys = None
         for ii, oo in zip(sys_input, sys_output):
-            if flag:
-                _sys = dpdata.LabeledSystem(
-                    oo, fmt="abacus/scf", type_map=jdata["type_map"]
-                )
-                if len(_sys) > 0:
+            _sys = dpdata.LabeledSystem(
+                oo, fmt="abacus/scf", type_map=jdata["type_map"]
+            )
+            if len(_sys) > 0:
+                if all_sys == None:
                     all_sys = _sys
-                    flag = False
                 else:
-                    pass
-            else:
-                _sys = dpdata.LabeledSystem(
-                    oo, fmt="abacus/scf", type_map=jdata["type_map"]
-                )
-                if len(_sys) > 0:
                     all_sys.append(_sys)
 
-        sys_data_path = os.path.join(work_path, "data.%s" % ss)
-        all_sys.to_deepmd_raw(sys_data_path)
-        all_sys.to_deepmd_npy(sys_data_path, set_size=len(sys_output))
+        if all_sys != None:
+            sys_data_path = os.path.join(work_path, "data.%s" % ss)
+            all_sys.to_deepmd_raw(sys_data_path)
+            all_sys.to_deepmd_npy(sys_data_path, set_size=len(sys_output))
 
 
 def post_fp_siesta(iter_index, jdata):
@@ -4156,7 +4151,6 @@ def post_fp_gaussian(iter_index, jdata):
 
 
 def post_fp_cp2k(iter_index, jdata, rfailed=None):
-
     ratio_failed = rfailed if rfailed else jdata.get("ratio_failed", 0.10)
     model_devi_jobs = jdata["model_devi_jobs"]
     assert iter_index < len(model_devi_jobs)
@@ -4217,7 +4211,6 @@ def post_fp_cp2k(iter_index, jdata, rfailed=None):
 
 
 def post_fp_pwmat(iter_index, jdata, rfailed=None):
-
     ratio_failed = rfailed if rfailed else jdata.get("ratio_failed", 0.05)
     model_devi_jobs = jdata["model_devi_jobs"]
     assert iter_index < len(model_devi_jobs)
@@ -4342,7 +4335,6 @@ def post_fp(iter_index, jdata):
 
 
 def set_version(mdata):
-
     deepmd_version = "1"
     mdata["deepmd_version"] = deepmd_version
     return mdata
@@ -4351,7 +4343,7 @@ def set_version(mdata):
 def run_iter(param_file, machine_file):
     try:
         import ruamel
-        from monty.serialization import loadfn, dumpfn
+        from monty.serialization import dumpfn, loadfn
 
         warnings.simplefilter("ignore", ruamel.yaml.error.MantissaNoDotYAML1_1Warning)
         jdata = loadfn(param_file)

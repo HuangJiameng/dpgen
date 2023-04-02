@@ -1,28 +1,35 @@
 #!/usr/bin/env python3
 
-import warnings
-import os, json, shutil, re, glob, argparse, sys
-import numpy as np
+import argparse
+import glob
+import json
+import os
+import re
+import shutil
 import subprocess as sp
-import dpgen.data.tools.hcp as hcp
-import dpgen.data.tools.fcc as fcc
-import dpgen.data.tools.diamond as diamond
-import dpgen.data.tools.sc as sc
-import dpgen.data.tools.bcc as bcc
-from dpgen import dlog
-from dpgen import ROOT_PATH
-from dpgen.remote.decide_machine import convert_mdata
-from dpgen.dispatcher.Dispatcher import make_submission_compat
-from dpgen.generator.lib.utils import symlink_user_forward_files
+import sys
+import warnings
 
-# -----PMG---------
-from pymatgen.io.vasp import Poscar
-from pymatgen.core import Structure, Element
-from pymatgen.io.ase import AseAtomsAdaptor
+import numpy as np
+from ase.build import general_surface
 
 # -----ASE-------
 from ase.io import read
-from ase.build import general_surface
+from pymatgen.core import Element, Structure
+from pymatgen.io.ase import AseAtomsAdaptor
+
+# -----PMG---------
+from pymatgen.io.vasp import Poscar
+
+import dpgen.data.tools.bcc as bcc
+import dpgen.data.tools.diamond as diamond
+import dpgen.data.tools.fcc as fcc
+import dpgen.data.tools.hcp as hcp
+import dpgen.data.tools.sc as sc
+from dpgen import ROOT_PATH, dlog
+from dpgen.dispatcher.Dispatcher import make_submission_compat
+from dpgen.generator.lib.utils import symlink_user_forward_files
+from dpgen.remote.decide_machine import convert_mdata
 
 
 def create_path(path):
@@ -221,7 +228,6 @@ def poscar_elong(poscar_in, poscar_out, elong, shift_center=True):
 
 
 def make_unit_cell(jdata):
-
     from_poscar = jdata.get("from_poscar", False)
     if not from_poscar:
         latt = jdata["latt"]
@@ -242,7 +248,6 @@ def make_unit_cell(jdata):
 
 
 def make_super_cell_pymatgen(jdata):
-
     make_unit_cell(jdata)
     out_dir = jdata["out_dir"]
     path_uc = os.path.join(out_dir, global_dirname_02)
@@ -640,7 +645,7 @@ def run_vasp_relax(jdata, mdata):
 def gen_init_surf(args):
     try:
         import ruamel
-        from monty.serialization import loadfn, dumpfn
+        from monty.serialization import dumpfn, loadfn
 
         warnings.simplefilter("ignore", ruamel.yaml.error.MantissaNoDotYAML1_1Warning)
         jdata = loadfn(args.PARAM)

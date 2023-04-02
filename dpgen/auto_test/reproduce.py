@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 from monty.serialization import loadfn
+
 import dpgen.auto_test.lib.abacus as abacus
 
 
@@ -138,7 +139,7 @@ def post_repro(
         else:
             nframe = len(init_task_result["energies"])
         # idid += nframe
-        natoms = init_task_result["atom_numbs"][0]
+        natoms = np.sum(init_task_result["atom_numbs"])
         if reprod_last_frame:
             init_ener = init_task_result["energies"][-1:]
         else:

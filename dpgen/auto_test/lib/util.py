@@ -1,10 +1,11 @@
+import os
+import re
+
 import numpy as np
 import requests
-import os, re
+
 from dpgen import dlog
-from dpgen.auto_test.lib import vasp
-from dpgen.auto_test.lib import lammps
-from dpgen.auto_test.lib import abacus
+from dpgen.auto_test.lib import abacus, lammps, vasp
 from dpgen.auto_test.lib.utils import cmd_append_log
 
 lammps_task_type = ["deepmd", "meam", "eam_fs", "eam_alloy"]  # 06/13 revised
@@ -36,7 +37,6 @@ def insert_data(task, task_type, username, file_name):
 
 
 def make_work_path(jdata, task, reprod_opt, static, user):
-
     task_type = jdata["task_type"]
     conf_dir = jdata["conf_dir"]
     conf_path = os.path.abspath(conf_dir)
@@ -93,7 +93,6 @@ def get_machine_info(mdata, task_type):
 
 
 def collect_task(all_task, task_type):
-
     if task_type == "vasp":
         output_file = "OUTCAR"
         check_finished = vasp.check_finished
